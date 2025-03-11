@@ -1,0 +1,35 @@
+app:
+  window_title: "Simple Video Tagger"
+  default_volume: 80
+  font:
+    name: "Menlo"
+    size: 12
+
+tags:
+  - name: DIV L
+    color: "#FF0000"
+    shortcut: Q
+  - name: DIV R
+    color: "#0000FF"
+    shortcut: W
+  - name: DIV L PROB
+    color: "#FFA500"
+    shortcut: A
+  - name: DIV R PROB
+    color: "#00FFFF"
+    shortcut: S
+  - name: DIV L FALS
+    color: "#550000"
+    shortcut: Z
+  - name: DIV R FALS
+    color: "#000055"
+    shortcut: X
+  - name: JUM
+    color: "#964B00"
+    shortcut: E
+  - name: JUM PROB
+    color: "#00FF00"
+    shortcut: D
+  - name: JUM FALS
+    color: "#005500"
+    shortcut: C
