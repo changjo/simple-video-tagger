@@ -19,9 +19,7 @@ class VideoTagger(QMainWindow):
         super().__init__()
 
         self.config = config
-        window_title = self.config.get("app", {}).get(
-            "window_title", "Simple Video Tagger"
-        )
+        window_title = self.config.get("app", {}).get("window_title", "Simple Video Tagger")
         self.setWindowTitle(window_title)
 
         central_widget = QWidget()
@@ -30,8 +28,8 @@ class VideoTagger(QMainWindow):
         main_layout = QHBoxLayout()
         central_widget.setLayout(main_layout)
 
-        self.video_player = VideoPlayer(self.config)
         self.tag_manager = TagManager()
+        self.video_player = VideoPlayer(self.config, self.tag_manager)
 
         self.tag_list = QListWidget()
         self.tag_list.setFixedWidth(200)
@@ -52,14 +50,14 @@ class VideoTagger(QMainWindow):
                 lambda tag_name=tag_name: self.add_tag(tag_name),
             )
 
-        QShortcut(QKeySequence(Qt.Key_Left), self, self.video_player.skip_5sec_backward)
-        QShortcut(QKeySequence(Qt.Key_Right), self, self.video_player.skip_5sec_forward)
+        skip_ms = 2000
+        QShortcut(QKeySequence(Qt.Key_Left), self, lambda: self.video_player.skip_time(-skip_ms))
+        QShortcut(QKeySequence(Qt.Key_Right), self, lambda: self.video_player.skip_time(skip_ms))
+
         QShortcut(QKeySequence(Qt.Key_Space), self, self.video_player.toggle_play_pause)
 
         # ctrl + s 키를 누르면 태그를 저장하는 기능을 추가합니다.
-        QShortcut(
-            QKeySequence(Qt.CTRL + Qt.Key_S), self, self.tag_manager.save_tags_to_json
-        )
+        QShortcut(QKeySequence(Qt.CTRL + Qt.Key_S), self, self.tag_manager.save_tags_to_json)
 
         # self.tag_manager.load_tags_from_json()
         self.tag_manager.load_tags_from_db()
@@ -85,9 +83,7 @@ class VideoTagger(QMainWindow):
             self.tag_manager.remove_tag(time_ms, tag_name)
             self.video_player.position_slider.setTags(self.tag_manager.get_tags())
         else:
-            time_ms, tag_name = item.data(
-                Qt.UserRole
-            )  # 저장해둔 밀리초(ms) 시간 꺼내기
+            time_ms, tag_name = item.data(Qt.UserRole)  # 저장해둔 밀리초(ms) 시간 꺼내기
             if time_ms is not None:
                 self.video_player.player.setPosition(time_ms)
                 self.video_player.player.play()

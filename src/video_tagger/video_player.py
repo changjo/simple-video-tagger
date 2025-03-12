@@ -3,15 +3,18 @@ from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer
 from PyQt5.QtMultimediaWidgets import QVideoWidget
 from PyQt5.QtWidgets import QFileDialog, QVBoxLayout, QWidget
 
+from .overlay_label import OverlayLabel
 from .tag_slider import TagSlider
 from .time_label import TimeLabel
+from .utils import format_time
 
 
 class VideoPlayer(QWidget):
-    def __init__(self, config):
+    def __init__(self, config, tag_manager):
         super().__init__()
 
         self.config = config
+        self.tag_manager = tag_manager
 
         # # 키보드 단축키, 재생/일시정지, 태그 추가 로직 등을 여기에 구현할 수 있음.
         # # 예: self.setFocusPolicy(Qt.StrongFocus) 후 keyPressEvent를 override 등.
@@ -23,6 +26,8 @@ class VideoPlayer(QWidget):
         self.video_widget = QVideoWidget()
         self.player.setVideoOutput(self.video_widget)
         self.video_widget.setMinimumSize(1280, 720)
+
+        self.overlay_label = OverlayLabel(self.video_widget)
 
         self.time_label = TimeLabel()
         self.time_label.setFixedHeight(10)
@@ -57,6 +62,7 @@ class VideoPlayer(QWidget):
         self.player.durationChanged.connect(self.update_duration)
         self.player.positionChanged.connect(self.update_time_label)
         self.player.durationChanged.connect(self.update_time_label)
+        self.player.positionChanged.connect(self.update_overlay_label)
 
     def load_video(self):
         file_dialog = QFileDialog.getOpenFileName(
@@ -79,12 +85,43 @@ class VideoPlayer(QWidget):
     def update_duration(self, duration):
         self.position_slider.setRange(0, duration)
 
+    def update_overlay_label(self, position):
+        tags = self.tag_manager.get_tags()
+
+        active_tags = []
+        for time_ms, tag_name in tags:
+            start_ms = time_ms
+            end_ms = time_ms + 1000
+            if start_ms <= position <= end_ms:
+                tag_text = f"[{format_time(time_ms)}] {tag_name}"
+                active_tags.append(tag_text)
+
+        if active_tags:
+            self.overlay_label.show_text("\n".join(active_tags))
+            # self.overlay_label.setText("\n".join(active_tags))
+            # self.overlay_label.adjustSize()
+            # self.overlay_label.show()
+        else:
+            self.overlay_label.hide_text()
+
+    def skip_time(self, ms):
+        new_position = self.player.position() + ms
+        self.player.setPosition(new_position)
+
     def skip_5sec_backward(self):
         new_position = self.player.position() - 5000  # 5000 ms = 5초
         self.player.setPosition(new_position)
 
     def skip_5sec_forward(self):
         new_position = self.player.position() + 5000  # 5000 ms = 5초
+        self.player.setPosition(new_position)
+
+    def skip_2sec_backward(self):
+        new_position = self.player.position() - 2000  # 5000 ms = 5초
+        self.player.setPosition(new_position)
+
+    def skip_2sec_forward(self):
+        new_position = self.player.position() + 2000  # 5000 ms = 5초
         self.player.setPosition(new_position)
 
     def toggle_play_pause(self):
