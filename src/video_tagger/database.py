@@ -16,7 +16,8 @@ class TagDatabase:
                 CREATE TABLE IF NOT EXISTS tags (
                     time_ms INTEGER,
                     tag_name TEXT,
-                    PRIMARY KEY (time_ms, tag_name)
+                    tag_type TEXT,
+                    PRIMARY KEY (time_ms, tag_name, tag_type)
                 )
             """
             )
@@ -45,28 +46,28 @@ class TagDatabase:
             cursor = conn.cursor()
             cursor.execute(
                 """
-                SELECT time_ms, tag_name FROM tags INDEXED
+                SELECT time_ms, tag_name, tag_type FROM tags INDEXED
                 BY idx_time_tag
-                ORDER BY time_ms, tag_name
+                ORDER BY time_ms, tag_name, tag_type
                 """
             )
             return cursor.fetchall()
 
-    def add_tag(self, time_ms, tag_name):
+    def add_tag(self, time_ms, tag_name, tag_type):
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(
-                "INSERT OR REPLACE INTO tags (time_ms, tag_name) VALUES (?, ?)",
-                (time_ms, tag_name),
+                "INSERT OR REPLACE INTO tags (time_ms, tag_name, tag_type) VALUES (?, ?, ?)",
+                (time_ms, tag_name, tag_type),
             )
             conn.commit()
 
-    def remove_tag(self, time_ms, tag_name):
+    def remove_tag(self, time_ms, tag_name, tag_type):
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(
-                "DELETE FROM tags WHERE time_ms = ? AND tag_name = ?",
-                (time_ms, tag_name),
+                "DELETE FROM tags WHERE time_ms = ? AND tag_name = ? AND tag_type = ?",
+                (time_ms, tag_name, tag_type),
             )
             conn.commit()
 
@@ -74,7 +75,7 @@ class TagDatabase:
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(
-                "SELECT time_ms, tag_name FROM tags WHERE tag_name LIKE ? ORDER BY time_ms",
+                "SELECT time_ms, tag_name, tag_type FROM tags WHERE tag_name LIKE ? ORDER BY time_ms",
                 (f"%{tag_name}%",),
             )
             return cursor.fetchall()
