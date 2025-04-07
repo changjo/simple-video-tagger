@@ -42,7 +42,17 @@ class TagSlider(QSlider):
 
         y_center = groove_rect.center().y()
 
-        for time_ms, tag_name in self.tags:
+        for tag in self.tags:
+            time_ms = tag.get("time_ms", 0)
+            tag_name = tag.get("tag_name", "")
+            if tag_name == "":
+                action_type = tag.get("action_type", "")
+                direction = tag.get("direction", "")
+                if not direction:
+                    direction = ""
+
+                tag_name = f"{action_type} {direction}".strip()
+
             # time_ms, tag_name = tag["time_ms"], tag["tag_name"]
             if slider_range == 0:
                 continue
