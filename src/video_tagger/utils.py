@@ -1,6 +1,7 @@
 import json
 import os
 
+import pandas as pd
 import yaml
 
 
@@ -17,6 +18,8 @@ def load_settings():
 
 
 def format_time(ms, show_miliseconds=True):
+    sign = "-" if ms < 0 else ""
+    ms = abs(ms)
     seconds = ms // 1000
     h = seconds // 3600
     m = (seconds % 3600) // 60
@@ -30,7 +33,7 @@ def format_time(ms, show_miliseconds=True):
         miliseconds = ms % 1000
         time_format += f".{miliseconds:03d}"
 
-    return time_format
+    return sign + time_format
 
 
 def load_json(filename):
