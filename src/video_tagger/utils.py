@@ -37,6 +37,8 @@ def format_time(ms, show_miliseconds=True):
     time_format = f"{m:02d}:{s:02d}"
     if h > 0:
         time_format = f"{h:02d}:" + time_format
+    else:
+        time_format = "00:" + time_format
 
     if show_miliseconds:
         miliseconds = ms % 1000

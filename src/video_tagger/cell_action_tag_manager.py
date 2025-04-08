@@ -23,6 +23,8 @@ class CellActionTagManager(QObject):
         time_ms = tag.get("time_ms")
         action_type = tag.get("action_type")
         direction = tag.get("direction")
+        if pd.isna(direction):
+            direction = ""
         value = tag.get("value")
         tag_name = f"{action_type} {direction} {value}"
         tag_text = f"[{format_time(time_ms)}] {tag_name}"
