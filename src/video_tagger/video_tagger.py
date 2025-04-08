@@ -68,7 +68,6 @@ class VideoTagger(QMainWindow):
         self.video_start_time_edit.setFixedWidth(200)
         self.video_start_time_edit.setDisplayFormat("yyyy-MM-dd HH:mm:ss.zzz")
         self.video_start_time_edit.setDateTime(QDateTime.currentDateTimeUtc())
-        self.video_start_time_edit.setFocusPolicy(Qt.NoFocus)
         self.video_start_time_layout.addWidget(self.video_start_time_edit)
         self.right_layout.addLayout(self.video_start_time_layout)
 
@@ -126,6 +125,8 @@ class VideoTagger(QMainWindow):
 
         if self.cell_action_tag_manager.video_start_time is not None:
             self.video_start_time_edit.setDateTime(self.cell_action_tag_manager.video_start_time)
+
+        self.cell_action_tag_list.setFocus()
 
         save_settings(self.config, self.config_path)
 
