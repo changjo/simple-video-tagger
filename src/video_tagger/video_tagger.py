@@ -51,6 +51,7 @@ class VideoTagger(QMainWindow):
         self.video_start_time_edit.setFixedWidth(200)
         self.video_start_time_edit.setDisplayFormat("yyyy-MM-dd HH:mm:ss.zzz")
         self.video_start_time_edit.setDateTime(QDateTime.currentDateTimeUtc())
+        self.video_start_time_edit.setFocusPolicy(Qt.NoFocus)
         self.video_start_time_layout.addWidget(self.video_start_time_edit)
         self.right_layout.addLayout(self.video_start_time_layout)
 
@@ -86,6 +87,8 @@ class VideoTagger(QMainWindow):
         skip_ms = 2000
         QShortcut(QKeySequence(Qt.Key_Left), self, lambda: self.video_player.skip_time(-skip_ms))
         QShortcut(QKeySequence(Qt.Key_Right), self, lambda: self.video_player.skip_time(skip_ms))
+        QShortcut(QKeySequence(Qt.Key_Up), self, lambda: self.video_player.increase_play_speed())
+        QShortcut(QKeySequence(Qt.Key_Down), self, lambda: self.video_player.decrease_play_speed())
 
         QShortcut(QKeySequence(Qt.Key_Space), self, self.video_player.toggle_play_pause)
 
