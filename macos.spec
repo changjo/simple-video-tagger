@@ -1,9 +1,12 @@
 # -*- mode: python ; coding: utf-8 -*-
 import os
+import sys
+
+sys.path.insert(0, os.path.abspath(SPECPATH))
 
 from PyInstaller.utils.hooks import get_package_paths
 
-# block_cipher = None
+from src.video_tagger import __version__
 
 python_lib = "/Users/changjo/miniconda3/envs/py3.12/lib/libpython3.12.dylib"
 binaries = []
@@ -56,5 +59,6 @@ app = BUNDLE(
     exe,
     name="SimpleVideoTagger.app",
     icon="resources/icons/icon.png",
+    version=__version__,
     bundle_identifier="com.simplevideotagger.app",
 )

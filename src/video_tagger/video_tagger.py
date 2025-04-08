@@ -17,6 +17,7 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 
+from . import __version__
 from .cell_action_tag_manager import CellActionTagManager
 from .config import load_data_config, save_data_config
 from .tag_manager import TagManager
@@ -41,7 +42,7 @@ class VideoTagger(QMainWindow):
         self.config = load_settings(self.config_path)
 
         window_title = self.config.get("app", {}).get("window_title", "Simple Video Tagger")
-        self.setWindowTitle(window_title)
+        self.setWindowTitle(f"{window_title} {__version__}")
 
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
