@@ -1,3 +1,4 @@
+import pandas as pd
 from PyQt5.QtCore import QObject, Qt, pyqtSignal
 from PyQt5.QtWidgets import QListWidgetItem
 
@@ -8,10 +9,12 @@ from .utils import format_time, load_json, save_json
 class TagManager(QObject):
     tagAdded = pyqtSignal(QListWidgetItem)
 
-    def __init__(self):
+    def __init__(self, parent=None):
         super().__init__()
+        self.parent = parent
         self.db_path = None
         self.db = None
+        self.video_start_time = None
 
     def load_db(self, db_path):
         self.db = TagDatabase(db_path)
@@ -53,11 +56,38 @@ class TagManager(QObject):
             self.add_tag(tag)
         print(f'Successfully loaded tags from database "{self.db_path}"')
 
-    def save_tags_to_json(self, filename="data/tagged_data/tags.json"):
+    def set_video_start_time(self, start_time):
+        self.video_start_time = start_time
+
+    def save_tags_to_json(self):
+        filename = self.db_path.replace(".db", ".json")
         tags = self.db.load_tags()
         columns = ["time_ms", "tag_name", "tag_type"]
-        tags_dict = [dict(zip(columns, tag)) for tag in tags]
-        save_json(tags_dict, filename)
+        df = pd.DataFrame(tags, columns=columns)
+        df.time_ms = pd.to_timedelta(df.time_ms, unit="ms")
+
+        if self.video_start_time is not None:
+            df["datetime"] = self.video_start_time + df.time_ms
+            df = df[["datetime", "time_ms", "tag_name", "tag_type"]]
+
+        json_data = df.to_dict(orient="records")
+        save_json(json_data, filename)
+        self.parent.statusBar().showMessage(f'Successfully saved tags to "{filename}"', 5000)
+        print(f'Successfully saved tags to "{filename}"')
+
+    def save_tags_to_csv(self):
+        filename = self.db_path.replace(".db", ".csv")
+        tags = self.db.load_tags()
+        columns = ["time_ms", "tag_name", "tag_type"]
+        df = pd.DataFrame(tags, columns=columns)
+        df.time_ms = pd.to_timedelta(df.time_ms, unit="ms")
+
+        if self.video_start_time is not None:
+            df["datetime"] = self.video_start_time + df.time_ms
+            df = df[["datetime", "time_ms", "tag_name", "tag_type"]]
+
+        df.to_csv(filename, index=False)
+        self.parent.statusBar().showMessage(f'Successfully saved tags to "{filename}"', 5000)
         print(f'Successfully saved tags to "{filename}"')
 
     def load_tags_from_json(self, filename="data/tagged_data/tags.json"):

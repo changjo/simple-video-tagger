@@ -12,6 +12,7 @@ from PyQt5.QtWidgets import (
     QListWidget,
     QMainWindow,
     QShortcut,
+    QStatusBar,
     QVBoxLayout,
     QWidget,
 )
@@ -35,10 +36,16 @@ class VideoTagger(QMainWindow):
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
 
+        self.setStatusBar(QStatusBar(self))
+        self.statusBar().setStyleSheet("QStatusBar { background-color: #2e2e2e; color: white; }")
+        self.statusBar().setContentsMargins(0, 0, 0, 0)
+        # self.statusBar().setFixedHeight(10)
+        self.statusBar().showMessage("Ready", 2000)
+
         main_layout = QHBoxLayout()
         central_widget.setLayout(main_layout)
 
-        self.tag_manager = TagManager()
+        self.tag_manager = TagManager(self)
         self.video_player = VideoPlayer(self.config, self.tag_manager)
 
         self.right_layout = QVBoxLayout()
@@ -93,7 +100,7 @@ class VideoTagger(QMainWindow):
         QShortcut(QKeySequence(Qt.Key_Space), self, self.video_player.toggle_play_pause)
 
         # ctrl + s 키를 누르면 태그를 저장하는 기능을 추가합니다.
-        QShortcut(QKeySequence(Qt.CTRL + Qt.Key_S), self, self.tag_manager.save_tags_to_json)
+        QShortcut(QKeySequence(Qt.CTRL + Qt.Key_S), self, self.tag_manager.save_tags_to_csv)
 
         # self.tag_manager.load_tags_from_json()
         self.data_directory = self.open_data_directory()
@@ -168,6 +175,7 @@ class VideoTagger(QMainWindow):
     def on_start_time_changed(self, datetime):
         self.cell_action_tag_list.clear()
         self.cell_action_tag_manager.set_video_start_time(datetime.toPyDateTime())
+        self.tag_manager.set_video_start_time(datetime.toPyDateTime())
         self.cell_action_tag_manager.load_cell_action_tags()
         self.video_player.cell_action_position_slider.setTags(
             self.cell_action_tag_manager.get_tags()
