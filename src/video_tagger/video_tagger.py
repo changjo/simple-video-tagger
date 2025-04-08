@@ -18,18 +18,28 @@ from PyQt5.QtWidgets import (
 )
 
 from .cell_action_tag_manager import CellActionTagManager
-from .config import DataConfig, load_data_config, save_data_config
+from .config import load_data_config, save_data_config
 from .tag_manager import TagManager
+from .utils import load_settings, save_settings
 from .video_player import VideoPlayer
 
 MANUAL_TAG_TYPE = "MANUAL"
 
 
 class VideoTagger(QMainWindow):
-    def __init__(self, config):
+    def __init__(self):
         super().__init__()
 
-        self.config = config
+        self.data_directory = self.open_data_directory()
+        if self.data_directory is None:
+            return
+
+        self.data_config_path = self.data_directory + "/data_config.yaml"
+        self.data_config = load_data_config(self.data_config_path)
+
+        self.config_path = self.data_directory + "/config.yaml"
+        self.config = load_settings(self.config_path)
+
         window_title = self.config.get("app", {}).get("window_title", "Simple Video Tagger")
         self.setWindowTitle(window_title)
 
@@ -102,14 +112,6 @@ class VideoTagger(QMainWindow):
         # ctrl + s 키를 누르면 태그를 저장하는 기능을 추가합니다.
         QShortcut(QKeySequence(Qt.CTRL + Qt.Key_S), self, self.tag_manager.save_tags_to_csv)
 
-        # self.tag_manager.load_tags_from_json()
-        self.data_directory = self.open_data_directory()
-        if self.data_directory is None:
-            return
-
-        self.data_config_path = self.data_directory + "/data_config.yaml"
-        self.data_config = load_data_config(self.data_config_path)
-
         self.tag_manager.load_db(self.data_config.db_path)
         self.tag_manager.load_tags_from_db()
         self.video_player.position_slider.setTags(self.tag_manager.get_tags())
@@ -124,6 +126,8 @@ class VideoTagger(QMainWindow):
 
         if self.cell_action_tag_manager.video_start_time is not None:
             self.video_start_time_edit.setDateTime(self.cell_action_tag_manager.video_start_time)
+
+        save_settings(self.config, self.config_path)
 
     def get_recent_data_directory(self):
         settings = QSettings("Fitogether", "SimpleVideoTagger")

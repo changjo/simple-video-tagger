@@ -19,7 +19,7 @@ def main():
 
     app.setFont(font)
 
-    window = VideoTagger(config)
+    window = VideoTagger()
     window.show()
     sys.exit(app.exec_())
 

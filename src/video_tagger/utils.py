@@ -1,13 +1,15 @@
 import json
 import os
 
-import pandas as pd
 import yaml
 
 
-def load_settings():
-    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-    config_path = os.path.join(base_dir, "config", "settings.yaml")
+def load_settings(filename=None):
+    if filename is None or not os.path.exists(filename):
+        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+        config_path = os.path.join(base_dir, "config", "settings.yaml")
+    else:
+        config_path = filename
 
     if not os.path.exists(config_path):
         return {}
@@ -15,6 +17,13 @@ def load_settings():
     with open(config_path, "r", encoding="utf-8") as f:
         data = yaml.safe_load(f)
     return data if data else {}
+
+
+def save_settings(data, filename):
+    print(filename)
+    with open(filename, "w", encoding="utf-8") as f:
+        yaml.dump(data, f, allow_unicode=True, default_flow_style=False)
+    print(f"Saved settings to {filename}")
 
 
 def format_time(ms, show_miliseconds=True):
