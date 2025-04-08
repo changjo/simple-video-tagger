@@ -4,21 +4,21 @@ import sys
 
 sys.path.insert(0, os.path.abspath(SPECPATH))
 
-from PyInstaller.utils.hooks import get_package_paths
-
 from src.video_tagger import __version__
 
-python_lib = "/Users/changjo/miniconda3/envs/py3.12/lib/libpython3.12.dylib"
-binaries = []
-if os.path.exists(python_lib):
-    binaries.append((python_lib, "."))
-else:
-    print("libpython3.12.dylib not found at", python_lib)
+block_cipher = None
+
+# python_lib = "/Users/changjo/miniconda3/envs/py3.12/lib/libpython3.12.dylib"
+# binaries = []
+# if os.path.exists(python_lib):
+#     binaries.append((python_lib, "."))
+# else:
+#     print("libpython3.12.dylib not found at", python_lib)
 
 a = Analysis(
     ["main.py"],
-    pathex=["/Users/changjo/github/changjo/simple-video-tagger"],
-    binaries=binaries,
+    pathex=[os.path.abspath(SPECPATH)],
+    # binaries=binaries,
     datas=[
         ("./config/*", "./config"),
         ("./resources/*", "./resources"),
@@ -30,12 +30,11 @@ a = Analysis(
     excludes=[],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
-    # cipher=block_cipher,
+    cipher=block_cipher,
     noarchive=False,
 )
 
-# pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
-pyz = PYZ(a.pure)
+pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 
 exe = EXE(
     pyz,
@@ -58,7 +57,7 @@ exe = EXE(
 app = BUNDLE(
     exe,
     name="SimpleVideoTagger.app",
-    icon="resources/icons/icon.png",
+    icon="resources/icons/icon.icns",
     version=__version__,
     bundle_identifier="com.simplevideotagger.app",
 )

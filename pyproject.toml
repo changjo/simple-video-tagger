@@ -1,3 +1,13 @@
+[project]
+name = "video-tagger"
+version = "0.1.0"
+description = "Simple Video Tagger"
+maintainers = [{ name = "Changjo Kim", email = "wowchangjo@gmail.com" }]
+authors = [{ name = "Changjo Kim", email = "wowchangjo@gmail.com" }]
+license = { file = "LICENSE" }
+requires-python = ">=3.11, <3.13"
+dependencies = ["pyqt5==5.15.11", "pandas==2.2.3", "pyyaml==6.0.2"]
+
 [tool.isort]
 line_length = 100
 multi_line_output = 3
@@ -11,7 +21,7 @@ src_paths = ['']
 
 [tool.black]
 line-length = 100
-target-version = ['py311']
+target-version = ['py312']
 include = '\.pyi?$'
 exclude = '''
 (
@@ -24,3 +34,7 @@ exclude = '''
     | \.deploy
 )
 '''
+
+[tool.poetry.group.dev.dependencies]
+pyinstaller = "^6.12.0"
+
