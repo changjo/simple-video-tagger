@@ -70,7 +70,7 @@ jobs:
       with:
         name: SimpleVideoTagger
         path: |
-          dist/Simple\ Video\ Tagger.dmg
+          dist/Simple Video Tagger.dmg
         if-no-files-found: error
 
   release:
@@ -94,4 +94,4 @@ jobs:
         draft: false
         prerelease: false
         files: |
-          "Simple Video Tagger.dmg"
+          Simple Video Tagger.dmg
