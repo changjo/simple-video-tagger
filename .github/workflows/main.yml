@@ -1,7 +1,4 @@
-# This workflow will install Python dependencies, run tests and lint with a single version of Python
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
-
-name: Simple Videl Tagger app build
+name: Simple Video Tagger app build
 
 on:
   push:
@@ -9,7 +6,7 @@ on:
       - 'v*.*.*'
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -28,7 +25,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
 
     - name: Install Poetry
-      uses: snok/intall-poetry@v1
+      uses: snok/install-poetry@v1
       with:
         virtualenvs-create: true
         virtualenvs-in-project: true
@@ -55,24 +52,37 @@ jobs:
     - name: Build app using PyInstaller
       run: |
         poetry run pyinstaller macos.spec --clean --noconfirm
+    
+    - name: Make a dmg
+      run: |
+        git clone https://github.com/create-dmg/create-dmg.git
+        create-dmg/create-dmg \
+          --volname "Simple Video Tagger" \
+          --window-pos 200 120 \
+          --window-size 800 400 \
+          --icon-size 100 \
+          --app-drop-link 650 185 \
+          "dist/Simple Video Tagger.dmg" \
+          "dist/Simple Video Tagger.app"
 
     - name: Archive build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: Simple Video Tagger
+        name: SimpleVideoTagger
         path: |
-          dist/Simple Video Tagger.app
-          
+          dist/Simple\ Video\ Tagger.dmg
+        if-no-files-found: error
+
   release:
     needs: build
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     steps:
-    - uses: action/checkout@v4
+    - uses: actions/checkout@v4
     - name: Download build artifacts
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
-        name: Simple Video Tagger
+        name: SimpleVideoTagger
 
     - name: Create release
       id: create_release
@@ -81,7 +91,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
+        release_name: ${{ github.ref }}
         draft: false
         prerelease: false
 
@@ -91,6 +101,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./dist/Simple Video Tagger.app
-        asset_name: Simple Video Tagger.app
+        asset_path: "Simple Video Tagger.dmg"
+        asset_name: Simple Video Tagger.dmg
         asset_content_type: application/octet-stream

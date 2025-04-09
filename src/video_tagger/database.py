@@ -75,7 +75,10 @@ class TagDatabase:
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(
-                "SELECT time_ms, tag_name, tag_type FROM tags WHERE tag_name LIKE ? ORDER BY time_ms",
+                """
+                SELECT time_ms, tag_name, tag_type FROM tags
+                WHERE tag_name LIKE ? ORDER BY time_ms
+                """,
                 (f"%{tag_name}%",),
             )
             return cursor.fetchall()

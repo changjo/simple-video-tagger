@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from PyQt5.QtCore import QDateTime, QSettings, Qt
 from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import (
