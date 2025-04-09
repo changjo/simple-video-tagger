@@ -53,7 +53,7 @@ coll = COLLECT(
 
 app = BUNDLE(
     coll,
-    name="SimpleVideoTagger.app",
+    name="Simple Video Tagger.app",
     icon="resources/icons/icon.icns",
     version=__version__,
     bundle_identifier="com.simplevideotagger.app",
