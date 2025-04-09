@@ -93,5 +93,6 @@ jobs:
         name: ${{ github.ref_name }}
         draft: false
         prerelease: false
+        fail_on_unmatched_files: true
         files: |
           Simple Video Tagger.dmg
