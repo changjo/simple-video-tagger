@@ -122,8 +122,11 @@ class VideoTagger(QMainWindow):
         self.cell_action_tag_manager.tagAdded.connect(self.on_cell_action_tag_added)
         self.cell_action_tag_manager.load_cell_action_tags()
 
-        if self.cell_action_tag_manager.video_start_time is not None:
-            self.video_start_time_edit.setDateTime(self.cell_action_tag_manager.video_start_time)
+        if self.data_config.video_start_time_utc != "":
+            video_start_time = QDateTime.fromString(
+                self.data_config.video_start_time_utc, "yyyy-MM-dd HH:mm:ss.zzz"
+            )
+            self.video_start_time_edit.setDateTime(video_start_time)
 
         self.cell_action_tag_list.setFocus()
 
