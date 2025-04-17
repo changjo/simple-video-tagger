@@ -10,4 +10,6 @@ exclude=
 ignore=
     E203,
     C901,
-    W503
+    W503,
+    F403,
+    F405

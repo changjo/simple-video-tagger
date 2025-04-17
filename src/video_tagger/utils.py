@@ -1,6 +1,8 @@
 import json
 import os
+from typing import Optional
 
+import pandas as pd
 import yaml
 
 
@@ -57,3 +59,16 @@ def save_json(data, filename):
     os.makedirs(os.path.dirname(filename), exist_ok=True)
     with open(filename, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
+
+
+def load_fusion_data(filename: str):
+    df = pd.read_csv(filename, parse_dates=["datetime"])
+    return df
+
+
+def get_video_time_ms(
+    datetimes: pd.Series, video_start_time_utc: Optional[pd.Timestamp]
+) -> pd.Series:
+    if video_start_time_utc is None:
+        return pd.Series([0] * len(datetimes))
+    return ((datetimes - video_start_time_utc).dt.total_seconds() * 1000).astype(int)

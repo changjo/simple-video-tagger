@@ -55,7 +55,7 @@ class VideoTagger(QMainWindow):
         central_widget.setLayout(main_layout)
 
         self.tag_manager = TagManager(self)
-        self.video_player = VideoPlayer(self.config, self.tag_manager)
+        self.video_player = VideoPlayer(self.config, self.data_config, self.tag_manager)
 
         self.right_layout = QVBoxLayout()
         self.video_start_time_layout = QHBoxLayout()
@@ -115,6 +115,7 @@ class VideoTagger(QMainWindow):
         self.video_player.position_slider.setTags(self.tag_manager.get_tags())
         self.video_player.load_video(self.data_config.video_path)
         self.data_config.video_path = self.video_player.video_path
+        self.data_config.fusion_data_path = self.video_player.fusion_data_path
 
         self.cell_action_tag_manager = CellActionTagManager(self)
         self.cell_action_tag_manager.load_cell_action(self.data_config.imu_action_path)
@@ -131,6 +132,7 @@ class VideoTagger(QMainWindow):
         self.cell_action_tag_list.setFocus()
 
         save_settings(self.config, self.config_path)
+        save_data_config(self.data_config, self.data_config_path)
 
     def get_recent_data_directory(self):
         settings = QSettings("Fitogether", "SimpleVideoTagger")
@@ -180,13 +182,15 @@ class VideoTagger(QMainWindow):
         )
 
     def on_start_time_changed(self, datetime):
+        pydatetime = datetime.toPyDateTime()
         self.cell_action_tag_list.clear()
-        self.cell_action_tag_manager.set_video_start_time(datetime.toPyDateTime())
-        self.tag_manager.set_video_start_time(datetime.toPyDateTime())
+        self.cell_action_tag_manager.set_video_start_time(pydatetime)
+        self.tag_manager.set_video_start_time(pydatetime)
         self.cell_action_tag_manager.load_cell_action_tags()
         self.video_player.cell_action_position_slider.setTags(
             self.cell_action_tag_manager.get_tags()
         )
+        self.video_player.cell_3d_cuboid.set_video_start_time_utc(pydatetime)
         self.data_config.video_start_time_utc = datetime.toString("yyyy-MM-dd HH:mm:ss.zzz")
         save_data_config(self.data_config, self.data_config_path)
 

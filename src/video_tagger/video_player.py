@@ -1,8 +1,10 @@
+import pandas as pd
 from PyQt5.QtCore import Qt, QUrl
 from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer
 from PyQt5.QtMultimediaWidgets import QVideoWidget
 from PyQt5.QtWidgets import QFileDialog, QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget
 
+from .cell_3d_cuboid import Cell3dCuboid
 from .overlay_label import OverlayLabel
 from .tag_slider import TagSlider
 from .time_label import TimeLabel
@@ -10,10 +12,11 @@ from .utils import format_time
 
 
 class VideoPlayer(QWidget):
-    def __init__(self, config, tag_manager):
+    def __init__(self, config, data_config, tag_manager):
         super().__init__()
 
         self.config = config
+        self.data_config = data_config
         self.tag_manager = tag_manager
 
         # # 키보드 단축키, 재생/일시정지, 태그 추가 로직 등을 여기에 구현할 수 있음.
@@ -22,20 +25,34 @@ class VideoPlayer(QWidget):
         layout = QVBoxLayout()
         self.setLayout(layout)
 
+        self.screen_layout = QHBoxLayout()
         self.video_path = None
-        self.player = QMediaPlayer(None, QMediaPlayer.VideoSurface)
+        self.fusion_data_path = self.data_config.fusion_data_path
+        self.video_start_time_utc = pd.Timestamp(self.data_config.video_start_time_utc)
         self.video_widget = QVideoWidget()
+        self.player = QMediaPlayer(None, QMediaPlayer.VideoSurface)
         self.player.setVideoOutput(self.video_widget)
+        self.player.setNotifyInterval(10)
         self.video_widget.setMinimumSize(1280, 720)
         self.play_speed = 1.0
+        self.screen_layout.addWidget(self.video_widget)
+
+        self.set_fusion_data_path(self.fusion_data_path)
+
+        if self.fusion_data_path != "":
+            self.cell_3d_cuboid = Cell3dCuboid(
+                self,
+                fusion_data_filename=self.fusion_data_path,
+                video_start_time_utc=self.video_start_time_utc,
+            )
+            self.cell_3d_cuboid.setMinimumSize(400, 200)
+            self.screen_layout.addWidget(self.cell_3d_cuboid)
 
         self.overlay_label = OverlayLabel(self.video_widget)
 
         self.button_layout = QHBoxLayout()
 
         self.time_label = TimeLabel()
-        # self.time_label.setFixedHeight(10)
-
         self.button_layout.addWidget(self.time_label)
         self.button_layout.addStretch(1)
 
@@ -109,8 +126,8 @@ class VideoPlayer(QWidget):
             self.pressed_cell_action_seek_position
         )
 
-        layout.addWidget(self.video_widget)
-        # layout.addWidget(self.time_label)
+        # layout.addWidget(self.video_widget)
+        layout.addLayout(self.screen_layout)
         layout.addLayout(self.button_layout)
         layout.addWidget(self.position_slider)
         layout.addWidget(self.cell_action_position_slider)
@@ -120,6 +137,8 @@ class VideoPlayer(QWidget):
         self.player.positionChanged.connect(self.update_time_label)
         self.player.durationChanged.connect(self.update_time_label)
         self.player.positionChanged.connect(self.update_overlay_label)
+        self.player.positionChanged.connect(self.update_cell_3d_cuboid)
+        self.player.durationChanged.connect(self.update_cell_3d_cuboid)
 
     def load_video(self, video_path):
         if video_path == "" or video_path is None:
@@ -137,6 +156,19 @@ class VideoPlayer(QWidget):
             self.player.setMedia(QMediaContent(video_url))
             self.player.play()
             self.update_playing_state()
+
+    def set_fusion_data_path(self, fusion_data_filename):
+        if fusion_data_filename is None or fusion_data_filename == "":
+            fusion_data_filename = QFileDialog.getOpenFileName(
+                self,
+                "Open Fusion Data File",
+                "",
+                "RIM Files (*.rim *.csv)",
+                options=QFileDialog.DontUseNativeDialog,
+            )[0]
+
+        if fusion_data_filename != "":
+            self.fusion_data_path = fusion_data_filename
 
     def increase_play_speed(self):
         self.play_speed += 0.2
@@ -171,6 +203,9 @@ class VideoPlayer(QWidget):
 
     def seek_position(self, position):
         self.player.setPosition(position)
+
+    def update_cell_3d_cuboid(self, position):
+        self.cell_3d_cuboid.set_current_video_time_ms(position)
 
     def update_slider(self, position):
         self.position_slider.setValue(position)

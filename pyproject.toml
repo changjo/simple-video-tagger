@@ -6,7 +6,13 @@ maintainers = [{ name = "Changjo Kim", email = "wowchangjo@gmail.com" }]
 authors = [{ name = "Changjo Kim", email = "wowchangjo@gmail.com" }]
 license = { file = "LICENSE" }
 requires-python = ">=3.11, <3.13"
-dependencies = ["pyqt5==5.15.11", "pandas==2.2.3", "pyyaml==6.0.2"]
+dependencies = [
+  "pyqt5==5.15.11",
+  "pandas==2.2.3",
+  "pyyaml==6.0.2",
+  "pyopengl (>=3.1.9,<4.0.0)",
+  "pyopengl-accelerate (>=3.1.9,<4.0.0)",
+]
 
 [tool.isort]
 line_length = 100
