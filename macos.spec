@@ -4,7 +4,7 @@ import sys
 
 sys.path.insert(0, os.path.abspath(SPECPATH))
 
-from src.video_tagger import __version__
+from src.video_tagger.version import __version__
 
 a = Analysis(
     ["main.py"],
