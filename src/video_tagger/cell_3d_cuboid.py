@@ -6,6 +6,7 @@ import pandas as pd
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from PyQt5.QtCore import QPoint, Qt, QTimer
+from PyQt5.QtGui import QFont, QImage, QPainter
 from PyQt5.QtWidgets import QOpenGLWidget
 
 from .utils import get_video_time_ms, load_fusion_data
@@ -63,6 +64,17 @@ class Cell3dCuboid(QOpenGLWidget):
         self.last_mouse_pos = QPoint()
         self.mouse_left_down = False
 
+        # color format: 0xAABBGGRR
+        self.face_labels = {
+            "front": ("F", 0xFF0000FF),
+            "back": ("B", 0xFF00FF00),
+            "left": ("L", 0xFFFF0000),
+            "right": ("R", 0xFF00FFFF),
+            "top": ("U", 0xFFFF00FF),
+            "bottom": ("D", 0xFFFFFF00),
+        }
+        self.textures = {}
+
     def set_video_start_time_utc(self, video_start_time_utc):
         self.video_start_time_utc = video_start_time_utc
         self.video_time_ms = get_video_time_ms(self.datetimes, self.video_start_time_utc)
@@ -103,11 +115,54 @@ class Cell3dCuboid(QOpenGLWidget):
         self.camera_distance = max(1.0, min(100.0, self.camera_distance))
         self.update()
 
+    def make_cell_box_texture(self):
+        for face, (char, color) in self.face_labels.items():
+            img = QImage(128, 128, QImage.Format_RGBA8888)
+
+            img.fill(color)
+
+            # QPainter로 중앙에 글자 그리기
+            painter = QPainter(img)
+            font = QFont("Helvetica", 128, QFont.Bold)
+            painter.setFont(font)
+            painter.setPen(Qt.white)
+            painter.drawText(img.rect(), Qt.AlignCenter, char)
+            painter.end()
+
+            # 바이트 버퍼 얻기
+            ptr = img.bits()
+            ptr.setsize(img.byteCount())
+            data = ptr.asstring()
+
+            # OpenGL 텍스처 생성
+            tex_id = glGenTextures(1)
+            # glEnable(GL_TEXTURE_2D)
+            glBindTexture(GL_TEXTURE_2D, tex_id)
+            glTexImage2D(
+                GL_TEXTURE_2D,
+                0,
+                GL_RGBA,
+                img.width(),
+                img.height(),
+                0,
+                GL_RGBA,
+                GL_UNSIGNED_BYTE,
+                data,
+            )
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
+            # glDisable(GL_TEXTURE_2D)
+
+            self.textures[face] = tex_id
+
     def initializeGL(self):
         glClearColor(0.1, 0.1, 0.1, 1.0)
         glEnable(GL_DEPTH_TEST)
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+        self.make_cell_box_texture()
 
     def resizeGL(self, w, h):
         if h == 0:
@@ -153,44 +208,93 @@ class Cell3dCuboid(QOpenGLWidget):
         self.update()
 
     def draw_cell_box(self):
+        glEnable(GL_TEXTURE_2D)
+
+        # Front face
+        glBindTexture(GL_TEXTURE_2D, self.textures["front"])
         glBegin(GL_QUADS)
-        # Front face (red)
-        glColor3f(1.0, 0.0, 0.0)
-        glVertex3f(self.device_width / 2, self.device_depth / 2, -self.device_height / 2)
-        glVertex3f(self.device_width / 2, self.device_depth / 2, self.device_height / 2)
-        glVertex3f(-self.device_width / 2, self.device_depth / 2, self.device_height / 2)
+        glColor3f(1.0, 1.0, 1.0)
+        glTexCoord2f(0, 0)
         glVertex3f(-self.device_width / 2, self.device_depth / 2, -self.device_height / 2)
-        # Back face (green)
-        glColor3f(0.0, 1.0, 0.0)
-        glVertex3f(self.device_width / 2, -self.device_depth / 2, -self.device_height / 2)
-        glVertex3f(self.device_width / 2, -self.device_depth / 2, self.device_height / 2)
-        glVertex3f(-self.device_width / 2, -self.device_depth / 2, self.device_height / 2)
-        glVertex3f(-self.device_width / 2, -self.device_depth / 2, -self.device_height / 2)
-        # Left face (blue)
-        glColor3f(0.0, 0.0, 1.0)
+        glTexCoord2f(1, 0)
         glVertex3f(self.device_width / 2, self.device_depth / 2, -self.device_height / 2)
+        glTexCoord2f(1, 1)
         glVertex3f(self.device_width / 2, self.device_depth / 2, self.device_height / 2)
-        glVertex3f(self.device_width / 2, -self.device_depth / 2, self.device_height / 2)
-        glVertex3f(self.device_width / 2, -self.device_depth / 2, -self.device_height / 2)
-        # Right face (yellow)
-        glColor3f(1.0, 1.0, 0.0)
-        glVertex3f(-self.device_width / 2, self.device_depth / 2, -self.device_height / 2)
-        glVertex3f(-self.device_width / 2, self.device_depth / 2, self.device_height / 2)
-        glVertex3f(-self.device_width / 2, -self.device_depth / 2, self.device_height / 2)
-        glVertex3f(-self.device_width / 2, -self.device_depth / 2, -self.device_height / 2)
-        # Top face (magenta)
-        glColor3f(1.0, 0.0, 1.0)
-        glVertex3f(self.device_width / 2, self.device_depth / 2, -self.device_height / 2)
-        glVertex3f(self.device_width / 2, -self.device_depth / 2, -self.device_height / 2)
-        glVertex3f(-self.device_width / 2, -self.device_depth / 2, -self.device_height / 2)
-        glVertex3f(-self.device_width / 2, self.device_depth / 2, -self.device_height / 2)
-        # Bottom face (cyan)
-        glColor3f(0.0, 1.0, 1.0)
-        glVertex3f(self.device_width / 2, self.device_depth / 2, self.device_height / 2)
-        glVertex3f(self.device_width / 2, -self.device_depth / 2, self.device_height / 2)
-        glVertex3f(-self.device_width / 2, -self.device_depth / 2, self.device_height / 2)
+        glTexCoord2f(0, 1)
         glVertex3f(-self.device_width / 2, self.device_depth / 2, self.device_height / 2)
         glEnd()
+
+        # Back face
+        glBindTexture(GL_TEXTURE_2D, self.textures["back"])
+        glBegin(GL_QUADS)
+        glColor3f(1.0, 1.0, 1.0)
+        glTexCoord2f(0, 0)
+        glVertex3f(self.device_width / 2, -self.device_depth / 2, -self.device_height / 2)
+        glTexCoord2f(1, 0)
+        glVertex3f(-self.device_width / 2, -self.device_depth / 2, -self.device_height / 2)
+        glTexCoord2f(1, 1)
+        glVertex3f(-self.device_width / 2, -self.device_depth / 2, self.device_height / 2)
+        glTexCoord2f(0, 1)
+        glVertex3f(self.device_width / 2, -self.device_depth / 2, self.device_height / 2)
+        glEnd()
+
+        # Left face
+        glBindTexture(GL_TEXTURE_2D, self.textures["left"])
+        glBegin(GL_QUADS)
+        glColor3f(1.0, 1.0, 1.0)
+        glTexCoord2f(0, 0)
+        glVertex3f(self.device_width / 2, self.device_depth / 2, -self.device_height / 2)
+        glTexCoord2f(1, 0)
+        glVertex3f(self.device_width / 2, -self.device_depth / 2, -self.device_height / 2)
+        glTexCoord2f(1, 1)
+        glVertex3f(self.device_width / 2, -self.device_depth / 2, self.device_height / 2)
+        glTexCoord2f(0, 1)
+        glVertex3f(self.device_width / 2, self.device_depth / 2, self.device_height / 2)
+        glEnd()
+
+        # Right face
+        glBindTexture(GL_TEXTURE_2D, self.textures["right"])
+        glBegin(GL_QUADS)
+        glColor3f(1.0, 1.0, 1.0)
+        glTexCoord2f(0, 0)
+        glVertex3f(-self.device_width / 2, -self.device_depth / 2, -self.device_height / 2)
+        glTexCoord2f(1, 0)
+        glVertex3f(-self.device_width / 2, self.device_depth / 2, -self.device_height / 2)
+        glTexCoord2f(1, 1)
+        glVertex3f(-self.device_width / 2, self.device_depth / 2, self.device_height / 2)
+        glTexCoord2f(0, 1)
+        glVertex3f(-self.device_width / 2, -self.device_depth / 2, self.device_height / 2)
+        glEnd()
+
+        # Top face
+        glBindTexture(GL_TEXTURE_2D, self.textures["top"])
+        glBegin(GL_QUADS)
+        glColor3f(1.0, 1.0, 1.0)
+        glTexCoord2f(0, 0)
+        glVertex3f(self.device_width / 2, self.device_depth / 2, -self.device_height / 2)
+        glTexCoord2f(1, 0)
+        glVertex3f(-self.device_width / 2, self.device_depth / 2, -self.device_height / 2)
+        glTexCoord2f(1, 1)
+        glVertex3f(-self.device_width / 2, -self.device_depth / 2, -self.device_height / 2)
+        glTexCoord2f(0, 1)
+        glVertex3f(self.device_width / 2, -self.device_depth / 2, -self.device_height / 2)
+        glEnd()
+
+        # Bottom face
+        glBindTexture(GL_TEXTURE_2D, self.textures["bottom"])
+        glBegin(GL_QUADS)
+        glColor3f(1.0, 1.0, 1.0)
+        glTexCoord2f(0, 0)
+        glVertex3f(self.device_width / 2, -self.device_depth / 2, self.device_height / 2)
+        glTexCoord2f(1, 0)
+        glVertex3f(-self.device_width / 2, -self.device_depth / 2, self.device_height / 2)
+        glTexCoord2f(1, 1)
+        glVertex3f(-self.device_width / 2, self.device_depth / 2, self.device_height / 2)
+        glTexCoord2f(0, 1)
+        glVertex3f(self.device_width / 2, self.device_depth / 2, self.device_height / 2)
+        glEnd()
+
+        glDisable(GL_TEXTURE_2D)
 
     def draw_global_axis(self):
         glLineWidth(2.0)
