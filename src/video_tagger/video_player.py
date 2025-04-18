@@ -165,7 +165,7 @@ class VideoPlayer(QWidget):
                 self,
                 "Open Fusion Data File",
                 "",
-                "RIM Files (*.rim *.csv)",
+                "Fusion Data File (*.rim *.csv)",
                 options=QFileDialog.DontUseNativeDialog,
             )[0]
 
