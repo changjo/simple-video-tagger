@@ -17,11 +17,11 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 
-from . import __version__
 from .cell_action_tag_manager import CellActionTagManager
 from .config import load_data_config, save_data_config
 from .tag_manager import TagManager
 from .utils import load_settings, save_settings
+from .version import __version__
 from .video_player import VideoPlayer
 
 MANUAL_TAG_TYPE = "MANUAL"
