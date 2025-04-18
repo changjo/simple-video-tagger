@@ -1,3 +1,5 @@
+import sys
+
 from PyQt5.QtCore import QDateTime, QSettings, Qt
 from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import (
@@ -31,6 +33,8 @@ class VideoTagger(QMainWindow):
 
         self.data_directory = self.open_data_directory()
         if self.data_directory is None:
+            QApplication.instance().quit()
+            sys.exit(0)
             return
 
         self.data_config_path = self.data_directory + "/data_config.yaml"
@@ -190,7 +194,8 @@ class VideoTagger(QMainWindow):
         self.video_player.cell_action_position_slider.setTags(
             self.cell_action_tag_manager.get_tags()
         )
-        self.video_player.cell_3d_cuboid.set_video_start_time_utc(pydatetime)
+        if self.video_player.cell_3d_cuboid is not None:
+            self.video_player.cell_3d_cuboid.set_video_start_time_utc(pydatetime)
         self.data_config.video_start_time_utc = datetime.toString("yyyy-MM-dd HH:mm:ss.zzz")
         save_data_config(self.data_config, self.data_config_path)
 

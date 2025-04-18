@@ -39,13 +39,15 @@ class VideoPlayer(QWidget):
 
         self.set_fusion_data_path(self.fusion_data_path)
 
+        self.cell_3d_cuboid = None
         if self.fusion_data_path != "":
             self.cell_3d_cuboid = Cell3dCuboid(
                 self,
                 fusion_data_filename=self.fusion_data_path,
                 video_start_time_utc=self.video_start_time_utc,
             )
-            self.cell_3d_cuboid.setMinimumSize(400, 200)
+            self.cell_3d_cuboid.setMinimumWidth(400)
+            self.cell_3d_cuboid.setMaximumWidth(600)
             self.screen_layout.addWidget(self.cell_3d_cuboid)
 
         self.overlay_label = OverlayLabel(self.video_widget)
@@ -205,7 +207,8 @@ class VideoPlayer(QWidget):
         self.player.setPosition(position)
 
     def update_cell_3d_cuboid(self, position):
-        self.cell_3d_cuboid.set_current_video_time_ms(position)
+        if self.cell_3d_cuboid is not None:
+            self.cell_3d_cuboid.set_current_video_time_ms(position)
 
     def update_slider(self, position):
         self.position_slider.setValue(position)
