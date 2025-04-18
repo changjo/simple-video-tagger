@@ -1,7 +1,7 @@
 # my_video_tagger/main.py
 import sys
 
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QSurfaceFormat
 from PyQt5.QtWidgets import QApplication
 
 from src.video_tagger.utils import load_settings
@@ -9,6 +9,13 @@ from src.video_tagger.video_tagger import VideoTagger
 
 
 def main():
+
+    fmt = QSurfaceFormat()
+    fmt.setDepthBufferSize(24)
+    fmt.setProfile(QSurfaceFormat.CompatibilityProfile)
+    fmt.setVersion(2, 1)
+    QSurfaceFormat.setDefaultFormat(fmt)
+
     app = QApplication(sys.argv)
     config = load_settings()
 

@@ -1,12 +1,18 @@
 [project]
 name = "video-tagger"
-version = "0.1.0"
+version = "0.2.0"
 description = "Simple Video Tagger"
 maintainers = [{ name = "Changjo Kim", email = "wowchangjo@gmail.com" }]
 authors = [{ name = "Changjo Kim", email = "wowchangjo@gmail.com" }]
 license = { file = "LICENSE" }
 requires-python = ">=3.11, <3.13"
-dependencies = ["pyqt5==5.15.11", "pandas==2.2.3", "pyyaml==6.0.2"]
+dependencies = [
+  "pyqt5==5.15.11",
+  "pandas==2.2.3",
+  "pyyaml==6.0.2",
+  "pyopengl (>=3.1.9,<4.0.0)",
+  "pyopengl-accelerate (>=3.1.9,<4.0.0)",
+]
 
 [tool.isort]
 line_length = 100
@@ -41,3 +47,4 @@ isort = "^6.0.1"
 flake8 = "^7.2.0"
 pyright = "^1.1.398"
 black = "^25.1.0"
+tomli = "^2.2.1"

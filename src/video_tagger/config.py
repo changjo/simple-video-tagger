@@ -17,6 +17,7 @@ class DataConfig:
     video_path: str
     db_path: str
     imu_action_path: str
+    fusion_data_path: str = ""
 
 
 def load_data_config(config_path: str) -> DataConfig:
@@ -32,7 +33,11 @@ def load_data_config(config_path: str) -> DataConfig:
     if not os.path.exists(config_path):
         db_path = os.path.join(os.path.dirname(config_path), "tags.db")
         return DataConfig(
-            video_start_time_utc="", video_path="", db_path=db_path, imu_action_path=""
+            video_start_time_utc="",
+            video_path="",
+            db_path=db_path,
+            imu_action_path="",
+            fusion_data_path="",
         )
 
     with open(config_path, "r", encoding="utf-8") as f:
