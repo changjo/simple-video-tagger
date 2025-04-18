@@ -22,7 +22,6 @@ def load_settings(filename=None):
 
 
 def save_settings(data, filename):
-    print(filename)
     with open(filename, "w", encoding="utf-8") as f:
         yaml.dump(data, f, allow_unicode=True, default_flow_style=False)
     print(f"Saved settings to {filename}")
