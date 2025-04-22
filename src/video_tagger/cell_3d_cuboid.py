@@ -1,5 +1,6 @@
 import math
 from bisect import bisect_left
+from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -17,7 +18,7 @@ class Cell3dCuboid(QOpenGLWidget):
         self,
         parent,
         fusion_data_filename: str,
-        video_start_time_utc: pd.Timestamp,
+        video_start_time_utc: Optional[pd.Timestamp],
     ):
         super(Cell3dCuboid, self).__init__(parent)
 
@@ -76,6 +77,9 @@ class Cell3dCuboid(QOpenGLWidget):
         self.textures = {}
 
     def set_video_start_time_utc(self, video_start_time_utc):
+        if video_start_time_utc is pd.NaT:
+            video_start_time_utc = self.datetimes[0]
+
         self.video_start_time_utc = video_start_time_utc
         self.video_time_ms = get_video_time_ms(self.datetimes, self.video_start_time_utc)
         print(f"Updated video start time: {self.video_start_time_utc}")
