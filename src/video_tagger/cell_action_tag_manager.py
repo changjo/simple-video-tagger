@@ -26,7 +26,8 @@ class CellActionTagManager(QObject):
         if pd.isna(direction):
             direction = ""
         value = tag.get("value")
-        tag_name = f"{action_type} {direction} {value}"
+        level = tag.get("level")
+        tag_name = " ".join(filter(lambda a: a != "", [action_type, direction, str(value), level]))
         tag_text = f"[{format_time(time_ms)}] {tag_name}"
         item = QListWidgetItem(tag_text)
         item.setData(Qt.UserRole, tag)
@@ -66,11 +67,13 @@ class CellActionTagManager(QObject):
                 action_type = row["type"]
                 direction = row["direction"]
                 value = row["value"]
+                level = row["level"]
 
                 if action_type == "JUM":
                     value = round(value * 100, 1)
+                    level = ""
                 elif action_type == "DIV":
-                    value = 0
+                    value = ""
 
                 tag = {
                     "time_ms": time_ms,
@@ -79,6 +82,7 @@ class CellActionTagManager(QObject):
                     "action_type": action_type,
                     "direction": direction,
                     "value": value,
+                    "level": level,
                     "tag_type": TAG_TYPE,
                 }
 

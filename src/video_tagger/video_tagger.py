@@ -12,6 +12,7 @@ from PyQt5.QtWidgets import (
     QListWidget,
     QMainWindow,
     QShortcut,
+    QSplitter,
     QStatusBar,
     QVBoxLayout,
     QWidget,
@@ -81,7 +82,8 @@ class VideoTagger(QMainWindow):
         self.tag_list_layout.addWidget(self.tag_list)
 
         self.cell_action_tag_list = QListWidget()  # 새 태그 리스트
-        self.cell_action_tag_list.setFixedWidth(200)
+        # self.cell_action_tag_list.setFixedWidth(400)
+        self.cell_action_tag_list.setMinimumWidth(400)
         self.cell_action_tag_list.setSortingEnabled(True)
         self.tag_list_layout.addWidget(self.cell_action_tag_list)
         self.right_layout.addLayout(self.tag_list_layout)
@@ -91,8 +93,21 @@ class VideoTagger(QMainWindow):
         self.cell_action_tag_list.itemDoubleClicked.connect(self.on_cell_action_tag_double_clicked)
         self.video_start_time_edit.dateTimeChanged.connect(self.on_start_time_changed)
 
-        main_layout.addWidget(self.video_player)
-        main_layout.addLayout(self.right_layout)
+        # main_layout.addWidget(self.video_player)
+        # main_layout.addLayout(self.right_layout)
+
+        self.right_container = QWidget()
+        self.right_container.setLayout(self.right_layout)
+
+        self.main_splitter = QSplitter(Qt.Horizontal)
+        self.main_splitter.addWidget(self.video_player)
+        self.main_splitter.addWidget(self.right_container)
+        self.main_splitter.setStretchFactor(0, 1)
+        self.main_splitter.setStretchFactor(1, 0)
+        self.main_splitter.setCollapsible(1, False)
+        self.main_splitter.setHandleWidth(5)
+
+        main_layout.addWidget(self.main_splitter)
 
         for tag in self.config["tags"]:
             tag_name = tag["name"]
