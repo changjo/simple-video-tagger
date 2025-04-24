@@ -15,4 +15,15 @@ tags:
   - name: JUM L
     color: "#FFA500"
     shortcut: Q
-    
+  - name: DIV L
+    color: "#00FFFF"
+    shortcut: Z
+  - name: DIV R
+    color: "#00FF00"
+    shortcut: C
+  - name: DIV F
+    color: "#964B00"
+    shortcut: S
+  - name: DIV B
+    color: "#550000"
+    shortcut: X
