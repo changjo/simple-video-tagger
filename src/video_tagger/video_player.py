@@ -32,7 +32,7 @@ class VideoPlayer(QWidget):
         self.video_widget = QVideoWidget()
         self.player = QMediaPlayer(None, QMediaPlayer.VideoSurface)
         self.player.setVideoOutput(self.video_widget)
-        self.player.setNotifyInterval(10)
+        self.player.setNotifyInterval(20)
         self.video_widget.setMinimumSize(1280, 720)
         self.play_speed = 1.0
         self.screen_layout.addWidget(self.video_widget)
